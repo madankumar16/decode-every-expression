@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Refund Policy — {{ site.name }}{% endblock %}
+{% block description %}{{ site.name }} is free, so there is nothing to refund.{% endblock %}
+
+{% block content %}
+<article class="prose">
+    <h1>Refund Policy</h1>
+    <p class="muted">Last updated {{ site.policy_date }}</p>
+    <p>{{ site.name }} is completely free. We never ask for payment details and take no payments, so there is nothing to refund.</p>
+    <p>If anyone asks you to pay for {{ site.name }}, it isn't us. Please let us know.</p>
+
+    <h2>Contact</h2>
+    {% include "legal/_contact.html" %}
+</article>
+{% endblock %}

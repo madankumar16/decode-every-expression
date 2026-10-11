@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Account — {{ site.name }}{% endblock %}
+{% block description %}Manage your {{ site.name }} account, snapshots and data.{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+
+{% block content %}
+<div class="dash">
+    <div class="wrap">
+        <h1>Your account</h1>
+
+        <section class="panel" aria-labelledby="details-title">
+            <h2 id="details-title" class="h3">Details we hold</h2>
+            <dl class="details">
+                <dt>Username</dt><dd>{{ g.user.username }}</dd>
+                <dt>Email</dt><dd>{{ g.user.email }}</dd>
+                <dt>Joined</dt><dd>{{ g.user.created_at[:10] }}</dd>
+                <dt>Snapshots</dt><dd>{{ captures|length }} of {{ config.MAX_CAPTURES_PER_USER }} (oldest are removed automatically)</dd>
+            </dl>
+            <p class="muted">That's everything. We don't store camera frames, only snapshots you save.</p>
+        </section>
+
+        <section class="panel" aria-labelledby="snaps-title">
+            <h2 id="snaps-title" class="h3">Your snapshots</h2>
+            {% if captures %}
+            <div class="account-grid">
+                {% for name in captures %}
+                <img src="{{ url_for('capture_file', filename=name) }}" alt="Snapshot taken {{ name[8:12] }}-{{ name[12:14] }}-{{ name[14:16] }} at {{ name[17:19] }}:{{ name[19:21] }}" loading="lazy" width="160" height="120">
+                {% endfor %}
+            </div>
+            <form method="post" action="{{ url_for('delete_captures') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn" type="submit">Delete all snapshots</button>
+            </form>
+            {% else %}
+            <p class="muted">No snapshots yet.</p>
+            {% endif %}
+        </section>
+
+        <section class="panel danger" aria-labelledby="delete-title">
+            <h2 id="delete-title" class="h3">Delete my account and data</h2>
+            <p>This permanently removes your account and every snapshot. It can't be undone.</p>
+            <form method="post" action="{{ url_for('delete_account') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="field">
+                    <label for="confirm-password">Confirm with your password</label>
+                    <input id="confirm-password" type="password" name="password" autocomplete="current-password" maxlength="128" required>
+                </div>
+                <button class="btn" type="submit">Permanently delete my account</button>
+            </form>
+        </section>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Cookie Policy — {{ site.name }}{% endblock %}
+{% block description %}The one cookie {{ site.name }} uses and why.{% endblock %}
+
+{% block content %}
+<article class="prose">
+    <h1>Cookie Policy</h1>
+    <p class="muted">Last updated {{ site.policy_date }}</p>
+    <p>We use a single, strictly necessary cookie. Without it you couldn't stay signed in.</p>
+
+    <h2>The cookie</h2>
+    <ul>
+        <li><strong>Name:</strong> es_session</li>
+        <li><strong>Purpose:</strong> keeps you signed in and protects forms from forgery.</li>
+        <li><strong>Lasts:</strong> up to 12 hours, or until you sign out.</li>
+        <li><strong>Set by:</strong> us. It is never shared.</li>
+    </ul>
+
+    <h2>What we don't use</h2>
+    <p>No analytics, advertising, social media or third-party cookies. Because the only cookie is essential, there's nothing to opt in to.</p>
+
+    <h2>Local storage</h2>
+    <p>Your browser remembers that you closed the cookie notice. This stays on your device and is never sent to us.</p>
+
+    <h2>Contact</h2>
+    {% include "legal/_contact.html" %}
+</article>
+{% endblock %}

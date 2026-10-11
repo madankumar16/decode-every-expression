@@ -1,299 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
+{% block title %}Dashboard — {{ site.name }}{% endblock %}
+{% block description %}Live facial expression estimates from your webcam.{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Emotion Dashboard - EmotiSense Pro</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}">
-    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-</head>
+{% block content %}
+<div class="dash">
+    <div class="wrap">
+        <h1>Hello, {{ g.user.username }}</h1>
+        <p class="lead">Start your camera to see live estimates.</p>
 
-<body>
-    <nav class="navbar">
-        <div class="logo-section">
-            <span class="logo-icon">🧠</span>
-            <span class="logo-text">EmotiSense Pro</span>
-        </div>
-        <div class="nav-right">
-            <div class="user-badge">
-                <div class="avatar">{{ username[0].upper() if username else 'U' }}</div>
-                <span>{{ username }}</span>
-            </div>
-            <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
-        </div>
-    </nav>
-
-    <div class="dashboard-container">
-        <header class="header-section">
-            <h1>Experience <span style="color: var(--primary)">Real-Time</span> Intelligence</h1>
-            <p>Advanced neural-link emotion analysis powered by AI</p>
-        </header>
-
-        <div class="main-grid">
-            <div class="video-container">
-                <div class="glass video-card">
-                    <div class="video-header">
-                        <h3>Live Feed Analysis</h3>
-                        <div class="status-indicator">
-                            <span class="pulse"></span>
-                            Pro Active
-                        </div>
-                    </div>
-
-                    <div class="viewport-container">
-                        <video id="webcam" autoplay playsinline muted></video>
-                        <canvas id="overlay"></canvas>
-                        <canvas id="hiddenCanvas" style="display:none;"></canvas>
-                    </div>
-
-                    <div class="controls-bar">
-                        <button class="btn btn-primary" onclick="captureSnapshot()">
-                            <span>📸</span> Capture Snapshot
-                        </button>
-                        <div id="connectionStatus"
-                            style="font-size: 0.8rem; color: var(--text-muted); align-self: center;">
-                            Syncing with AI Model...
-                        </div>
-                    </div>
+        <div class="dash-grid">
+            <section class="panel" aria-labelledby="feed-title">
+                <h2 id="feed-title" class="visually-hidden">Camera</h2>
+                <div class="viewport" id="viewport">
+                    <p id="camera-placeholder">Your camera is off. Frames are analysed in memory and never stored unless you take a snapshot.</p>
+                    <video id="webcam" class="is-hidden" autoplay playsinline muted></video>
+                    <canvas id="overlay" class="is-hidden" aria-hidden="true"></canvas>
+                    <canvas id="hidden-canvas" class="is-hidden" aria-hidden="true"></canvas>
                 </div>
-            </div>
+                <div class="controls">
+                    <button class="btn" type="button" id="camera-btn">
+                        <svg class="icon" aria-hidden="true"><use href="#i-camera"/></svg>
+                        <span id="camera-btn-label">Start camera</span>
+                    </button>
+                    <button class="btn" type="button" id="snapshot-btn" disabled>Save snapshot</button>
+                </div>
+                <p class="status-msg" id="status" role="status" aria-live="polite"></p>
+            </section>
 
-            <div class="sidebar">
-                <div class="glass card">
-                    <h3>📊 Response Matrix</h3>
-                    <div class="emotion-stack">
+            <div>
+                <section class="panel" aria-labelledby="summary-title">
+                    <h2 id="summary-title" class="h3">Summary</h2>
+                    <dl class="stats">
+                        <div><dt>Dominant</dt><dd id="dominant">–</dd></div>
+                        <div><dt>Confidence</dt><dd id="confidence">–</dd></div>
+                        <div><dt>Intensity</dt><dd id="intensity">–</dd></div>
+                        <div><dt>Faces</dt><dd id="face-count">0</dd></div>
+                    </dl>
+                    <p class="muted" id="insight">Waiting for a face…</p>
+                </section>
+
+                <section class="panel" aria-labelledby="bars-title">
+                    <h2 id="bars-title" class="h3">Expressions</h2>
+                    <ul class="bars">
                         {% for emotion in ['Happy', 'Sad', 'Surprise', 'Angry', 'Fear', 'Disgust', 'Neutral'] %}
-                        <div class="emotion-row">
-                            <div class="label-wrap">
-                                <div class="emotion-label">
-                                    <span class="emoji">{{
-                                        {'Happy':'😊','Sad':'😢','Surprise':'😮','Angry':'😠','Fear':'😨','Disgust':'🤢','Neutral':'😐'}[emotion]
-                                        }}</span>
-                                    {{ emotion }}
-                                </div>
-                                <span class="percent" id="val-{{ emotion }}">0.0%</span>
+                        <li>
+                            <div class="bar-head"><span>{{ emotion }}</span><span id="val-{{ emotion }}">0.0%</span></div>
+                            <div class="bar-track" role="progressbar" aria-label="{{ emotion }}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="track-{{ emotion }}">
+                                <div class="bar-fill" id="bar-{{ emotion }}"></div>
                             </div>
-                            <div class="progress-track">
-                                <div class="progress-fill" id="bar-{{ emotion }}" style="width: 0%"></div>
-                            </div>
-                        </div>
+                        </li>
                         {% endfor %}
-                    </div>
-                </div>
-
-                <div class="glass card">
-                    <h3>📡 Global Metrics</h3>
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <div class="stat-value" id="dominant">-</div>
-                            <div class="stat-name">Dominant</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value" id="intensity">-</div>
-                            <div class="stat-name">Intensity</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">99.4%</div>
-                            <div class="stat-name">Precision</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value" id="faceCount">0</div>
-                            <div class="stat-name">Faces</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass card">
-                    <h3>🔍 Human Intel Insight</h3>
-                    <div
-                        style="padding: 1rem; background: rgba(56, 189, 248, 0.05); border-radius: 12px; border-left: 4px solid var(--primary);">
-                        <p id="aiInsight" style="font-size: 1.1rem; font-weight: 600; color: var(--primary);">Scanning
-                            for emotional patterns...</p>
-                    </div>
-                </div>
+                    </ul>
+                </section>
             </div>
         </div>
     </div>
+</div>
+{% endblock %}
 
-    <script>
-        const socket = io();
-        const video = document.getElementById('webcam');
-        const overlay = document.getElementById('overlay');
-        const ctx = overlay.getContext('2d');
-        const hiddenCanvas = document.getElementById('hiddenCanvas');
-        const hCtx = hiddenCanvas.getContext('2d');
-
-        let isProcessing = false;
-        let lastFrameTime = Date.now();
-
-        // Standard colors for emotions
-        const emotionColors = {
-            'Happy': '#10b981',
-            'Sad': '#3b82f6',
-            'Surprise': '#f59e0b',
-            'Angry': '#ef4444',
-            'Fear': '#8b5cf6',
-            'Disgust': '#10b981',
-            'Neutral': '#38bdf8'
-        };
-
-        // Initialize Webcam
-        async function initWebcam() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: 1280, height: 720, frameRate: 15 }
-                });
-                video.srcObject = stream;
-
-                video.onloadedmetadata = () => {
-                    overlay.width = video.videoWidth;
-                    overlay.height = video.videoHeight;
-                    hiddenCanvas.width = 300; // Lower res for faster processing
-                    hiddenCanvas.height = (300 / video.videoWidth) * video.videoHeight;
-                    startProcessing();
-                };
-            } catch (err) {
-                console.error("Camera error:", err);
-                let errorMessage = "Camera Access Denied";
-                let instruction = "Please enable camera permissions in your browser settings to use the real-time detection model.";
-
-                if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
-                    errorMessage = "Secure Context Required";
-                    instruction = "Camera access requires an HTTPS connection or 'localhost'. Please use a secure connection.";
-                }
-
-                document.querySelector('.viewport-container').innerHTML = `
-                    <div style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; color: #ef4444; padding: 2rem; text-align:center; background: rgba(0,0,0,0.2); border-radius: 20px;">
-                        <span style="font-size: 3.5rem; margin-bottom: 1.5rem; filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.4));">🚫</span>
-                        <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem; color: white;">${errorMessage}</h3>
-                        <p style="color: var(--text-muted); margin-bottom: 2rem; max-width: 300px;">${instruction}</p>
-                        <button onclick="window.location.reload()" class="btn btn-primary" style="padding: 0.8rem 2rem; border-radius: 12px;">
-                            <span>🔄</span> Try Again
-                        </button>
-                    </div>
-                `;
-            }
-        }
-
-        function startProcessing() {
-            setInterval(() => {
-                if (!isProcessing && socket.connected) {
-                    processFrame();
-                }
-            }, 200); // 5 FPS for processing is plenty for emotions
-        }
-
-        function processFrame() {
-            isProcessing = true;
-
-            // Safety timeout: if no response in 2s, allow next frame
-            setTimeout(() => { isProcessing = false; }, 2000);
-
-            hCtx.drawImage(video, 0, 0, hiddenCanvas.width, hiddenCanvas.height);
-            const dataUrl = hiddenCanvas.toDataURL('image/jpeg', 0.5);
-            socket.emit('process_frame', { image: dataUrl });
-            lastFrameTime = Date.now();
-        }
-
-        socket.on('emotion_results', (data) => {
-            isProcessing = false;
-
-            drawOverlay(data.faces);
-            updateStats(data.global_emotions, data.faces.length);
-
-            if (data.faces.length > 0) {
-                const analysis = data.faces[0].analysis;
-                document.getElementById('aiInsight').innerText = analysis.insight;
-                document.getElementById('intensity').innerText = analysis.intensity;
-                document.getElementById('dominant').innerText = data.faces[0].emotion;
-            } else {
-                document.getElementById('aiInsight').innerText = "Scanning for patterns...";
-                document.getElementById('intensity').innerText = "Idle";
-                document.getElementById('dominant').innerText = "-";
-            }
-
-            document.getElementById('connectionStatus').innerText = "AI Link: Stable";
-        });
-
-        function drawOverlay(faces) {
-            ctx.clearRect(0, 0, overlay.width, overlay.height);
-
-            const scaleX = overlay.width / hiddenCanvas.width;
-            const scaleY = overlay.height / hiddenCanvas.height;
-
-            faces.forEach(face => {
-                const [x, y, w, h] = face.box.map((v, i) => (i % 2 === 0 ? v * scaleX : v * scaleY));
-                const color = emotionColors[face.emotion] || '#38bdf8';
-
-                // Bounding box with glow
-                ctx.strokeStyle = color;
-                ctx.lineWidth = 4;
-                ctx.lineJoin = 'round';
-                ctx.strokeRect(x, y, w, h);
-
-                // Label
-                ctx.fillStyle = color;
-                ctx.fillRect(x, y - 60, w, 60);
-
-                ctx.fillStyle = 'white';
-                ctx.font = 'bold 20px Outfit';
-                ctx.fillText(face.emotion, x + 10, y - 35);
-
-                ctx.font = '400 14px Outfit';
-                ctx.fillText(face.analysis.insight, x + 10, y - 12);
-            });
-        }
-
-        function updateStats(emotions, count) {
-            let dominant = '-';
-            let maxVal = 0;
-
-            for (const [name, val] of Object.entries(emotions)) {
-                const bar = document.getElementById(`bar-${name}`);
-                const text = document.getElementById(`val-${name}`);
-                if (bar) bar.style.width = `${val}%`;
-                if (text) text.innerText = `${val.toFixed(1)}%`;
-
-                if (val > maxVal) {
-                    maxVal = val;
-                    dominant = name;
-                }
-            }
-
-            document.getElementById('dominant').innerText = dominant;
-            document.getElementById('faceCount').innerText = count;
-        }
-
-        async function captureSnapshot() {
-            hCtx.drawImage(video, 0, 0, hiddenCanvas.width, hiddenCanvas.height);
-            const image = hiddenCanvas.toDataURL('image/jpeg', 0.8);
-
-            try {
-                const res = await fetch('/capture', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image })
-                });
-                if (res.ok) alert("Intelligence Snapshot Saved!");
-            } catch (e) {
-                alert("Capture Failed");
-            }
-        }
-
-        // Handle connection states
-        socket.on('connect', () => {
-            document.getElementById('connectionStatus').innerText = "AI Link: Connected";
-        });
-        socket.on('disconnect', () => {
-            document.getElementById('connectionStatus').innerText = "AI Link: Disconnected";
-        });
-
-        initWebcam();
-    </script>
-</body>
-
-</html>
+{% block scripts %}
+<script src="{{ url_for('static', filename='vendor/socket.io.min.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}" defer></script>
+{% endblock %}

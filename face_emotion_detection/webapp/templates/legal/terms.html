@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Terms of Service — {{ site.name }}{% endblock %}
+{% block description %}The rules for using {{ site.name }}.{% endblock %}
+
+{% block content %}
+<article class="prose">
+    <h1>Terms of Service</h1>
+    <p class="muted">Last updated {{ site.policy_date }}</p>
+    <p>By creating an account you agree to these terms. If you don't agree, please don't use {{ site.name }}.</p>
+
+    <h2>Who can use it</h2>
+    <p>You must be 18 or older and give accurate account details.</p>
+
+    <h2>What the service does</h2>
+    <p>{{ site.name }} estimates facial expressions from camera images. Results are automated guesses and can be wrong. Expressions don't reliably show what someone feels.</p>
+
+    <h2>What you must not do</h2>
+    <ul>
+        <li>Analyse anyone without their clear permission.</li>
+        <li>Use results to make decisions about people's jobs, health, education, credit, insurance or legal matters.</li>
+        <li>Attack, overload or try to break into the service or other accounts.</li>
+    </ul>
+
+    <h2>Price</h2>
+    <p>The service is free. There are no subscriptions, hidden fees or in-app purchases.</p>
+
+    <h2>Your account</h2>
+    <p>Keep your password private. You can delete your account any time. We may suspend accounts that break these terms.</p>
+
+    <h2>No warranty</h2>
+    <p>The service is provided "as is". To the extent the law allows, we aren't liable for losses from using it or relying on its results.</p>
+
+    <h2>Changes</h2>
+    <p>We may update these terms and will change the date above when we do.</p>
+
+    <h2>Law</h2>
+    <p>These terms are governed by the laws of India.</p>
+
+    <h2>Contact</h2>
+    {% include "legal/_contact.html" %}
+</article>
+{% endblock %}

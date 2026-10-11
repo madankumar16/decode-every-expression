@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Privacy Policy — {{ site.name }}{% endblock %}
+{% block description %}What {{ site.name }} collects, why, how long we keep it and how to delete it.{% endblock %}
+
+{% block content %}
+<article class="prose">
+    <h1>Privacy Policy</h1>
+    <p class="muted">Last updated {{ site.policy_date }}</p>
+    <p>{{ site.name }} is run by {{ site.owner or 'its operator' }} ("we"). This policy explains what we collect and your choices.</p>
+
+    <h2>What we collect</h2>
+    <ul>
+        <li><strong>Account details:</strong> your username, email address and a one-way hash of your password (we never see or store the password itself).</li>
+        <li><strong>Consent records:</strong> the date you accepted the Terms and confirmed you are 18 or older.</li>
+        <li><strong>Snapshots you choose to save:</strong> up to {{ config.MAX_CAPTURES_PER_USER }} images. Older ones are deleted automatically.</li>
+        <li><strong>Technical data:</strong> your IP address is used briefly in memory to limit abusive requests. Our hosting provider may also keep standard server logs.</li>
+    </ul>
+
+    <h2>Camera frames</h2>
+    <p>When you start the camera, frames are sent to our server, analysed in memory and discarded straight away. We do not record video or keep frames unless you press "Save snapshot". Your face images are sensitive. We use them only to show you results.</p>
+
+    <h2>Why we use it</h2>
+    <p>To run your account, show expression estimates, keep the service secure and meet legal duties. We rely on your consent and on our contract with you.</p>
+
+    <h2>What we don't do</h2>
+    <p>We don't sell your data, show ads, use analytics or tracking tools, or share data with anyone except our hosting provider and where the law requires.</p>
+
+    <h2>How long we keep it</h2>
+    <p>Until you delete it or your account. Deleting your account removes everything at once.</p>
+
+    <h2>Your rights</h2>
+    <p>You can see your data and delete your snapshots or your whole account any time from your <a href="{{ url_for('account') }}">Account page</a>. To correct details or ask questions, contact us. These rights apply under India's Digital Personal Data Protection Act, 2023, and similar laws where you live.</p>
+
+    <h2>Age</h2>
+    <p>The service is only for people aged 18 or over. We don't knowingly collect data from children.</p>
+
+    <h2>Security</h2>
+    <p>Passwords are hashed, connections should use HTTPS, and snapshots are private to your account. No system is perfectly secure, so please use a unique password.</p>
+
+    <h2>Contact and grievances</h2>
+    {% include "legal/_contact.html" %}
+</article>
+{% endblock %}

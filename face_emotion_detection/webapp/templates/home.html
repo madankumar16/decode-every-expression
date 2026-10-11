@@ -1,129 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
+{% block title %}{{ site.name }} — Real-time facial expression estimation{% endblock %}
+{% block description %}Use your webcam to estimate seven facial expressions live. Frames are analysed in memory and never stored unless you save a snapshot.{% endblock %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EmotiSense Pro - AI Facial Intelligence</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}">
-    <style>
-        .hero {
-            height: 90vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 0 2rem;
-        }
+{% block content %}
+<section class="hero">
+    <div class="wrap">
+        <p class="eyebrow">Facial expression estimation</p>
+        <h1>Read expressions in real time.</h1>
+        <p class="lead">Turn on your webcam and watch seven basic expressions estimated live.</p>
+        {% if g.user %}
+        <a class="btn" href="{{ url_for('dashboard') }}">Open dashboard</a>
+        {% else %}
+        <a class="btn" href="{{ url_for('register') }}">Create a free account</a>
+        {% endif %}
+    </div>
+</section>
 
-        .hero-inner {
-            max-width: 900px;
-        }
-
-        .hero h1 {
-            font-size: clamp(3rem, 8vw, 5rem);
-            margin-bottom: 1.5rem;
-            line-height: 1.1;
-        }
-
-        .hero p {
-            font-size: 1.5rem;
-            color: var(--text-muted);
-            margin-bottom: 3rem;
-        }
-
-        .cta-group {
-            display: flex;
-            gap: 1.5rem;
-            justify-content: center;
-        }
-
-        .feature-showcase {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            padding: 5rem 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .f-card {
-            padding: 2.5rem;
-            transition: transform 0.3s;
-        }
-
-        .f-card:hover {
-            transform: translateY(-10px);
-        }
-
-        .f-icon {
-            font-size: 3rem;
-            margin-bottom: 1.5rem;
-            display: block;
-        }
-
-        .f-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .f-card p {
-            color: var(--text-muted);
-            line-height: 1.6;
-        }
-    </style>
-</head>
-
-<body>
-    <nav class="navbar">
-        <div class="logo-section">
-            <span class="logo-icon">🧠</span>
-            <span class="logo-text">EmotiSense Pro</span>
-        </div>
-        <div class="nav-right">
-            <a href="{{ url_for('login') }}" class="btn-logout">Sign In</a>
-            <a href="{{ url_for('register') }}" class="btn btn-primary">Join Now</a>
-        </div>
-    </nav>
-
-    <header class="hero">
-        <div class="hero-inner">
-            <h1>Decode Every <span
-                    style="background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Expression</span>
-                with AI</h1>
-            <p>The world's most intuitive real-time emotion detection model for developers and researchers.</p>
-            <div class="cta-group">
-                <a href="{{ url_for('register') }}" class="btn btn-primary"
-                    style="font-size: 1.25rem; padding: 1rem 2.5rem;">Launch Intelligence →</a>
+<section class="section section-alt" aria-labelledby="how">
+    <div class="wrap">
+        <h2 id="how">How it works</h2>
+        <div class="grid-3">
+            <div class="feature">
+                <svg class="icon" aria-hidden="true"><use href="#i-scan"/></svg>
+                <h3>Seven expressions</h3>
+                <p>Happy, sad, surprise, anger, fear, disgust and neutral, each with a confidence score.</p>
+            </div>
+            <div class="feature">
+                <svg class="icon" aria-hidden="true"><use href="#i-pulse"/></svg>
+                <h3>Live results</h3>
+                <p>Frames are analysed as you watch, about five per second.</p>
+            </div>
+            <div class="feature">
+                <svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg>
+                <h3>Nothing kept by default</h3>
+                <p>Frames are processed in memory and discarded. Snapshots are saved only when you take one.</p>
             </div>
         </div>
-    </header>
+    </div>
+</section>
 
-    <section class="feature-showcase">
-        <div class="glass f-card">
-            <span class="f-icon">🎯</span>
-            <h3>High Precision</h3>
-            <p>Deep neural networks trained on millions of parameters for sub-millisecond accuracy.</p>
-        </div>
-        <div class="glass f-card">
-            <span class="f-icon">📡</span>
-            <h3>Zero Latency</h3>
-            <p>Optimized WebRTC pipeline ensures real-time feedback with minimum overhead.</p>
-        </div>
-        <div class="glass f-card">
-            <span class="f-icon">🛡️</span>
-            <h3>Private & Secure</h3>
-            <p>Edge processing ensures your biometric data remains encrypted and safe.</p>
-        </div>
-    </section>
-
-    <footer
-        style="padding: 4rem 2rem; border-top: 1px solid var(--glass-border); text-align: center; color: var(--text-muted);">
-        <p>&copy; 2026 EmotiSense Pro. Built with Neural Intelligence.</p>
-    </footer>
-</body>
-
-</html>
+<section class="section" aria-labelledby="note">
+    <div class="wrap">
+        <h2 id="note">An estimate, not a verdict</h2>
+        <p class="lead">Expressions don't always match feelings. Don't use results for hiring, medical or legal decisions.</p>
+        <a class="btn" href="{{ url_for('terms') }}">Read the terms</a>
+    </div>
+</section>
+{% endblock %}

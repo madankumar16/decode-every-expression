@@ -1,0 +1,5 @@
+{% if site.email or site.phone %}
+<p>Contact {{ site.owner or 'us' }}{% if site.email %} at <a href="mailto:{{ site.email }}">{{ site.email }}</a>{% endif %}{% if site.phone %}{% if site.email %} or{% endif %} on <a href="tel:{{ site.phone | replace(' ', '') }}">{{ site.phone }}</a>{% endif %}.{% if site.address %} Postal address: {{ site.address }}.{% endif %}</p>
+{% else %}
+<p>Contact the site operator using the details shown in the footer of this page.</p>
+{% endif %}

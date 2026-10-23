@@ -72,6 +72,24 @@ def test_debug_off_and_secure_cookie_defaults():
     assert webapp.app.config["SESSION_COOKIE_SAMESITE"] == "Lax"
 
 
+def test_cross_site_cookie_option_for_hugging_face_embed():
+    env = dict(os.environ, SESSION_COOKIE_SAMESITE="none", INSTANCE_DIR=tempfile.mkdtemp())
+    code = ("import app; c = app.app.config; "
+            "print(c['SESSION_COOKIE_SAMESITE'], c['SESSION_COOKIE_SECURE'], c['SESSION_COOKIE_PARTITIONED'])")
+    proc = subprocess.run([sys.executable, "-c", code], cwd=os.path.abspath(WEBAPP),
+                          env=env, capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stderr
+    assert proc.stdout.split()[-3:] == ["None", "True", "True"]
+
+
+def test_rejects_invalid_samesite_value():
+    env = dict(os.environ, SESSION_COOKIE_SAMESITE="sometimes", INSTANCE_DIR=tempfile.mkdtemp())
+    proc = subprocess.run([sys.executable, "-c", "import app"], cwd=os.path.abspath(WEBAPP),
+                          env=env, capture_output=True, text=True)
+    assert proc.returncode != 0
+    assert "SESSION_COOKIE_SAMESITE" in proc.stderr
+
+
 def test_refuses_to_start_without_secret_key_in_production():
     env = {k: v for k, v in os.environ.items() if k not in ("APP_TESTING", "SECRET_KEY", "FLASK_DEBUG")}
     env["INSTANCE_DIR"] = tempfile.mkdtemp()
@@ -85,9 +103,10 @@ def test_security_headers(client):
     r = client.get("/")
     h = r.headers
     assert "default-src 'self'" in h["Content-Security-Policy"]
-    assert "frame-ancestors 'none'" in h["Content-Security-Policy"]
+    assert ("frame-ancestors 'self' https://huggingface.co https://*.hf.space"
+            in h["Content-Security-Policy"])
     assert h["X-Content-Type-Options"] == "nosniff"
-    assert h["X-Frame-Options"] == "DENY"
+    assert "X-Frame-Options" not in h  # would block the Hugging Face embed
     assert "camera=(self)" in h["Permissions-Policy"]
     assert h["Referrer-Policy"] == "strict-origin-when-cross-origin"
 

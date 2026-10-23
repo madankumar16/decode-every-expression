@@ -56,6 +56,16 @@ if not secret_key:
 
 INSTANCE_DIR = os.environ.get("INSTANCE_DIR", os.path.join(BASE_DIR, "instance"))
 
+# Lax by default. Set SESSION_COOKIE_SAMESITE=None so sign-in also works inside
+# the Hugging Face page iframe; the cookie is then Secure and Partitioned (CHIPS).
+SAMESITE = os.environ.get("SESSION_COOKIE_SAMESITE", "Lax").strip().capitalize()
+if SAMESITE not in ("Lax", "Strict", "None"):
+    raise RuntimeError("SESSION_COOKIE_SAMESITE must be Lax, Strict or None.")
+CROSS_SITE_COOKIE = SAMESITE == "None"
+
+# Sites allowed to show this app in an iframe: itself and Hugging Face Spaces.
+FRAME_ANCESTORS = "'self' https://huggingface.co https://*.hf.space"
+
 app.config.update(
     SECRET_KEY=secret_key,
     DEBUG=DEBUG,
@@ -63,8 +73,9 @@ app.config.update(
     MAX_CONTENT_LENGTH=3 * 1024 * 1024,  # 3 MB per request
     SESSION_COOKIE_NAME="es_session",
     SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE="Lax",
-    SESSION_COOKIE_SECURE=env_flag("SESSION_COOKIE_SECURE", not (DEBUG or TESTING)),
+    SESSION_COOKIE_SAMESITE=SAMESITE,
+    SESSION_COOKIE_SECURE=CROSS_SITE_COOKIE or env_flag("SESSION_COOKIE_SECURE", not (DEBUG or TESTING)),
+    SESSION_COOKIE_PARTITIONED=CROSS_SITE_COOKIE,
     PERMANENT_SESSION_LIFETIME=timedelta(hours=12),
     WTF_CSRF_TIME_LIMIT=None,  # token lives as long as the session
     DATABASE_PATH=os.environ.get("DATABASE_PATH", os.path.join(INSTANCE_DIR, "app.db")),
@@ -209,11 +220,12 @@ def security_headers(response):
         "font-src 'self'; "
         f"connect-src 'self' {scheme}://{request.host}; "
         "object-src 'none'; base-uri 'self'; form-action 'self'; "
-        "frame-ancestors 'none'"
+        f"frame-ancestors {FRAME_ANCESTORS}"
     )
     response.headers.setdefault("Content-Security-Policy", csp)
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
-    response.headers.setdefault("X-Frame-Options", "DENY")
+    # No X-Frame-Options: it cannot allow a list of sites, and CSP
+    # frame-ancestors above already limits who may embed the app.
     response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
     response.headers.setdefault(
         "Permissions-Policy", "camera=(self), microphone=(), geolocation=(), payment=()")

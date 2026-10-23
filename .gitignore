@@ -1,15 +1,19 @@
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
 venv/
 env/
+.venv*/
+.pytest_cache/
+
+# Secrets and private data — never commit these
 .env
+.env.*
+!.env.example
+face_emotion_detection/webapp/instance/
 
-# OpenCV / ML
-face_emotion_detection/webapp/static/captures/*
-!face_emotion_detection/webapp/static/captures/.gitkeep
-
-# OS
+# OS / editors
 .DS_Store
 Thumbs.db
+.vscode/
+.idea/

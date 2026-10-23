@@ -1,36 +1,29 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
+FROM python:3.12-slim
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PORT=7860
 
-# Install system dependencies for OpenCV and other libs
-RUN apt-get update && apt-get install -y \
-    libgl1-mesa-glx \
-    libglib2.0-0 \
+# libglib is the only system library opencv-python-headless needs
+RUN apt-get update && apt-get install -y --no-install-recommends libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# Set the working directory in the container
+# Run as an unprivileged user (uid 1000 also matches Hugging Face Spaces)
+RUN useradd --create-home --uid 1000 appuser
 WORKDIR /app
 
-# Copy the requirements file into the container
 COPY requirements.txt .
+RUN pip install -r requirements.txt
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+COPY --chown=appuser:appuser face_emotion_detection ./face_emotion_detection
+RUN mkdir -p /app/face_emotion_detection/webapp/instance \
+    && chown appuser:appuser /app/face_emotion_detection/webapp/instance \
+    && chmod 700 /app/face_emotion_detection/webapp/instance
 
-# Copy the rest of the application code into the container
-COPY . .
-
-# Create directory for captures and set permissions (HF runs as user 1000)
-RUN mkdir -p face_emotion_detection/webapp/static/captures && \
-    chmod -R 777 face_emotion_detection/webapp/static/captures
-
-# Expose the port the app runs on
+USER appuser
+WORKDIR /app/face_emotion_detection/webapp
 EXPOSE 7860
 
-# Command to run the application
-# We use the webapp directory as the starting point
-WORKDIR /app/face_emotion_detection/webapp
-CMD ["python", "app.py"]
+# Production server. One worker is required for Socket.IO; threads handle concurrency.
+CMD gunicorn --workers 1 --threads 50 --bind 0.0.0.0:${PORT} --timeout 60 app:app

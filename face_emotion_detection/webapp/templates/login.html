@@ -1,220 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
+{% block title %}Sign in — {{ site.name }}{% endblock %}
+{% block description %}Sign in to your {{ site.name }} account.{% endblock %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Access - EmotiSense Pro</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}">
-    <style>
-        .auth-page {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            position: relative;
-        }
-
-        /* Animated backdrop for the login page specifically */
-        .auth-bg-blob {
-            position: absolute;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(56, 189, 248, 0.2) 0%, transparent 70%);
-            z-index: -1;
-            filter: blur(60px);
-            animation: moveBlob 15s infinite alternate;
-        }
-
-        @keyframes moveBlob {
-            from {
-                transform: translate(-10%, -10%);
-            }
-
-            to {
-                transform: translate(10%, 10%);
-            }
-        }
-
-        .auth-card {
-            width: 100%;
-            max-width: 480px;
-            padding: 3.5rem;
-            text-align: center;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
-            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .auth-card h2 {
-            font-size: 2.25rem;
-            margin-bottom: 0.75rem;
-            letter-spacing: -1px;
-        }
-
-        .auth-card p {
-            color: var(--text-muted);
-            margin-bottom: 2.5rem;
-            font-size: 1.05rem;
-        }
-
-        .form-group {
-            text-align: left;
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.6rem;
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .input-group {
-            position: relative;
-        }
-
-        .input-group span {
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            font-size: 1.25rem;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 1.1rem 1rem 1.1rem 1rem;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--glass-border);
-            border-radius: 14px;
-            color: white;
-            font-size: 1rem;
-            outline: none;
-            transition: all 0.3s;
-        }
-
-        .form-group input:focus {
-            border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.07);
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
-        }
-
-        .btn-full {
-            width: 100%;
-            justify-content: center;
-            margin-top: 1.5rem;
-            padding: 1.1rem;
-            font-size: 1.1rem;
-            border-radius: 14px;
-        }
-
-        .auth-footer {
-            margin-top: 2.5rem;
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            border-top: 1px solid var(--glass-border);
-            padding-top: 2rem;
-        }
-
-        .auth-footer a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 700;
-            transition: color 0.2s;
-        }
-
-        .auth-footer a:hover {
-            color: var(--secondary);
-            text-decoration: underline;
-        }
-
-        .brand-icon {
-            font-size: 3.5rem;
-            margin-bottom: 1.5rem;
-            display: inline-block;
-            filter: drop-shadow(0 0 10px var(--primary));
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-    </style>
-</head>
-
-<body>
-    <div class="auth-bg-blob"></div>
-    <div class="auth-page">
-        <div class="glass auth-card">
-            <span class="brand-icon">🧠</span>
-            <h2>Pro Access</h2>
-            <p>Deploying AI Facial Intelligence</p>
-
-            <form method="POST">
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <div class="input-group">
-                        <input type="email" name="email" placeholder="name@company.com" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Username</label>
-                    <div class="input-group">
-                        <input type="text" name="username" placeholder="pro_analyst" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Access Password</label>
-                    <div class="input-group">
-                        <input type="password" name="password" placeholder="••••••••••••" required>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-full">
-                    <span>⚡</span>
-                    Initialize Intelligence
-                </button>
-            </form>
-
-            <div class="auth-footer">
-                <a href="#"
-                    style="color: var(--text-muted); font-size: 0.85rem; text-decoration: none; display: block; margin-bottom: 1rem;">Forgot
-                    Password?</a>
-                Unauthorized access is logged. <br>
-                New operative? <a href="{{ url_for('register') }}">Request Access</a>
+{% block content %}
+<div class="auth">
+    <div class="auth-card">
+        <h1>Sign in</h1>
+        <form method="post" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="field">
+                <label for="email">Email</label>
+                <input id="email" type="email" name="email" value="{{ email }}" autocomplete="email" maxlength="254" required>
             </div>
-        </div>
+            <div class="field">
+                <label for="password">Password</label>
+                <input id="password" type="password" name="password" autocomplete="current-password" maxlength="128" required>
+            </div>
+            <button class="btn full" type="submit">Sign in</button>
+        </form>
+        <p class="form-foot">New here? <a href="{{ url_for('register') }}">Create an account</a>{% if site.email %}. Forgot your password? Email <a href="mailto:{{ site.email }}">{{ site.email }}</a>{% endif %}.</p>
     </div>
-</body>
-
-</html>
+</div>
+{% endblock %}

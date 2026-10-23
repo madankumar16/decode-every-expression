@@ -1,143 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
+{% block title %}Create account — {{ site.name }}{% endblock %}
+{% block description %}Create a free {{ site.name }} account to estimate facial expressions with your webcam.{% endblock %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Request Access - EmotiSense Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}">
-    <style>
-        .auth-page {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            position: relative;
-        }
-
-        .auth-card {
-            width: 100%;
-            max-width: 500px;
-            padding: 3.5rem;
-            text-align: center;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
-            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .auth-card h2 {
-            font-size: 2.25rem;
-            margin-bottom: 0.75rem;
-            letter-spacing: -1px;
-        }
-
-        .auth-card p {
-            color: var(--text-muted);
-            margin-bottom: 2.5rem;
-        }
-
-        .form-group {
-            text-align: left;
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.6rem;
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 1.1rem;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--glass-border);
-            border-radius: 14px;
-            color: white;
-            font-size: 1rem;
-            outline: none;
-            transition: all 0.3s;
-        }
-
-        .form-group input:focus {
-            border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.07);
-        }
-
-        .btn-full {
-            width: 100%;
-            justify-content: center;
-            margin-top: 1.5rem;
-            padding: 1.1rem;
-            font-size: 1.1rem;
-            border-radius: 14px;
-        }
-
-        .auth-footer {
-            margin-top: 2.5rem;
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            border-top: 1px solid var(--glass-border);
-            padding-top: 2rem;
-        }
-
-        .auth-footer a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 700;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="auth-page">
-        <div class="glass auth-card">
-            <div style="font-size: 3.5rem; margin-bottom: 1.5rem;">🧬</div>
-            <h2>Neural Profile</h2>
-            <p>Establish your credentials in the network</p>
-
-            <form method="POST">
-
-                <div class="form-group">
-                    <label>Email ID</label>
-                    <input type="email" name="email" placeholder="smith@matrix.net" required>
-                </div>
-                <div class="form-group">
-                    <label>Unique Username</label>
-                    <input type="text" name="username" placeholder="agent_smith_01" required>
-                </div>
-                <div class="form-group">
-                    <label>Security Password</label>
-                    <input type="password" name="password" placeholder="••••••••••••" required>
-                </div>
-                <button type="submit" class="btn btn-primary btn-full">Generate Access Profile →</button>
-            </form>
-
-            <div class="auth-footer">
-                <a href="#"
-                    style="color: var(--text-muted); font-size: 0.85rem; text-decoration: none; display: block; margin-bottom: 1rem;">Forgot
-                    Password?</a>
-                Already registered in the system? <a href="{{ url_for('login') }}">Secure Login</a>
+{% block content %}
+<div class="auth">
+    <div class="auth-card">
+        <h1>Create account</h1>
+        <form method="post" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="field">
+                <label for="username">Username</label>
+                <input id="username" type="text" name="username" value="{{ form.username }}" autocomplete="username"
+                       minlength="3" maxlength="30" pattern="[A-Za-z0-9_.\-]{3,30}" aria-describedby="username-hint" required>
+                <span class="hint" id="username-hint">3–30 letters, numbers, dots, dashes or underscores.</span>
             </div>
-        </div>
+            <div class="field">
+                <label for="email">Email</label>
+                <input id="email" type="email" name="email" value="{{ form.email }}" autocomplete="email" maxlength="254" required>
+            </div>
+            <div class="field">
+                <label for="password">Password</label>
+                <input id="password" type="password" name="password" autocomplete="new-password"
+                       minlength="10" maxlength="128" aria-describedby="password-hint" required>
+                <span class="hint" id="password-hint">At least 10 characters.</span>
+            </div>
+            <div class="check">
+                <input id="age_confirm" type="checkbox" name="age_confirm" value="yes" required>
+                <label for="age_confirm">I am 18 or older.</label>
+            </div>
+            <button class="btn full" type="submit">Create account</button>
+        </form>
+        <p class="form-foot">Already have an account? <a href="{{ url_for('login') }}">Sign in</a>.</p>
     </div>
-</body>
-
-</html>
+</div>
+{% endblock %}

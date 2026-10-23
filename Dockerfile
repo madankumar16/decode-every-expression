@@ -26,4 +26,5 @@ WORKDIR /app/face_emotion_detection/webapp
 EXPOSE 7860
 
 # Production server. One worker is required for Socket.IO; threads handle concurrency.
-CMD gunicorn --workers 1 --threads 50 --bind 0.0.0.0:${PORT} --timeout 60 app:app
+# exec makes gunicorn PID 1 so it receives SIGTERM and shuts down cleanly.
+CMD ["sh", "-c", "exec gunicorn --workers 1 --threads 50 --bind 0.0.0.0:${PORT} --timeout 60 app:app"]
